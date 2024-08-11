@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-
 	const login = async (email, password) => {
 		const response = await fetch('https://eco-cred.vercel.app/api/sign_in/', {
 			method: 'POST',

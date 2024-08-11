@@ -3,6 +3,8 @@
 	import Logo from '$lib/components/Logo.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import { isUserLoggedIn, demo } from '$lib/stores/store';
+	import ecology from '$lib/assets/ecology-sprout-svgrepo-com.svg';
+
 	import { onMount } from 'svelte';
 	const citiesByState = {
 		'Andhra Pradesh': [
@@ -145,7 +147,7 @@
 
 <main class="box-border flex h-[100vh] w-[100vw] bg-gradient-to-r from-green-500 to-green-600">
 	<div class="box-border w-[50%] p-16">
-		<img src={Logo} class="h-48 w-48" alt="" />
+		<img src={ecology} class="h-48 w-48" alt="" />
 		<h1 class="mt-12 text-7xl font-bold text-white">Unlock Sustainable Financing with EcoCred</h1>
 		<p class="mt-8 text-xl font-bold text-white">
 			ecocred is an initiative that calculates your 'green score' to help you access financial loans
