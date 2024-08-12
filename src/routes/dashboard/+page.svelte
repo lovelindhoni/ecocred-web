@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import Speedometer from '$lib/components/Speedometer.svelte';
-    import user from "$lib/assets/user-circle-svgrepo-com.svg"
+	import user from '$lib/assets/profile.png';
+	import bin from '$lib/assets/ecologism-recycle-svgrepo-com (1).svg';
+	import leaves from '$lib/assets/green-leaves-svgrepo-com.svg';
+	import logo from '$lib/assets/ecology-sprout-svgrepo-com.svg';
 	const jwt = sessionStorage.getItem('jwt');
 	if (jwt == null) {
 		goto('/');
@@ -41,35 +44,64 @@
 	graph();
 </script>
 
-<main class="box-border h-[100vh] w-[100vw] flex flex-col">
+<main class="box-border flex h-[100vh] w-[100vw] flex-col">
 	<div class="flex w-full justify-between bg-[#22c55e] p-8 text-white">
-		<p class="text-4xl">Ecocred</p>
-		<div class="flex gap-4 items-center">
+		<div class="flex items-center justify-center gap-4">
+			<img src={logo} class="h-20 w-20" alt="" />
+			<p class="text-5xl font-bold">EcoCred</p>
+		</div>
+		<div class="flex items-center gap-4">
 			<img src={user} class="h-12 w-12" alt="" />
-			<p class="text-xl">{email}</p>
+			<p class="text-xl font-bold">{email}</p>
 		</div>
 	</div>
-	<div class="flex-1 flex flex-col items-center justify-center">
-		<div class="border border-black w-fit flex p-8 rounded-xl justify-center items-center gap-8">
+	<div class="flex flex-1 flex-col items-center justify-center">
+		<div class=" flex w-fit items-center justify-center gap-24 rounded-xl p-8">
 			<img src={user} class="h-24 w-24" alt="" />
-            <div>
-			<p>{email}</p>
-			<p>East Delhi</p>
-            </div>
+			<div>
+				<p class="text-2xl">{email}</p>
+				<p class="text-2xl">East Delhi</p>
+			</div>
 		</div>
-        <div class="flex-1 flex border border-black w-full ">
-		{#if homeData}                                
-        <div class="border border-black flex-1 p-12 flex">
-			<Speedometer value={homeData?.average_green_score} />
-            <p class="text-2xl">Average Green Score: <br>{homeData.average_green_score}</p>
-        </div>
-        <div class="border border-black flex-1 p-12">
-			<Speedometer value={homeData?.average_green_score} />
-        </div>
-        <div class="border border-black flex-1 p-12">
-			<Speedometer value={homeData?.average_green_score} />
-        </div>
-		{/if}
-        </div>
+		<div class="flex w-full flex-1 border border-black">
+			{#if homeData}
+				<div class="flex-2 box-border items-center justify-center border border-black px-12 pt-12">
+					<div class="flex h-full flex-col items-center justify-center">
+						<Speedometer value={homeData?.average_green_score} />
+						<div class="flex items-center">
+							<img src={leaves} class="h-24 w-24" alt="" />
+							<div class="flex flex-col gap-2 text-xl">
+								<p class="font-bold">Average Green Score</p>
+								<p>{homeData.average_green_score}</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="flex-1 border border-black p-12"></div>
+				<div class="flex-2 flex flex-col justify-center border border-black p-12">
+					<div class="flex items-center gap-4">
+						<img src={bin} class="h-24 w-24" alt="" />
+						<div class="flex flex-col gap-2 text-xl">
+							<p class="font-bold">Recycle Score</p>
+							<p>{homeData.average_recycle_score}</p>
+						</div>
+					</div>
+					<div class="mt-14 flex w-full flex-col justify-center space-y-5">
+						<div class="flex space-x-10 text-2xl">
+							<p>Electricity Bill linked</p>
+							<span class="badge bg-[#22c55e] p-4 text-2xl font-bold text-white">Success</span>
+						</div>
+						<div class="flex items-center space-x-10 text-2xl">
+							<p>Water Bill linked</p>
+							<span class="badge bg-[#22c55e] p-4 text-2xl font-bold text-white">Success</span>
+						</div>
+						<div class="flex items-center space-x-10 text-2xl">
+							<p>LPG linked</p>
+							<span class="badge bg-[#22c55e] p-4 text-2xl font-bold text-white">Success</span>
+						</div>
+					</div>
+				</div>
+			{/if}
+		</div>
 	</div>
 </main>
