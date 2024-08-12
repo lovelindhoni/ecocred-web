@@ -8,7 +8,7 @@
 	maxValue={10}
 	value={value}
 	needleColor="red"
-	startColor="green"
+	startColor="red"
 	segments={10}
-	endColor="blue"
+	endColor="green"
 />
