@@ -137,11 +137,17 @@
 			})
 		});
 		const data = await response.json();
-		console.log(data.status);
+		console.log("Ddd",data);
 		if (data.status === 'failure') {
 			window.alert("Sorry user account doesn't exist, please create a new Accounts");
 			$isUserLoggedIn = false;
 		}
+		else{
+			sessionStorage.setItem("jwt", data.access_token);
+			sessionStorage.setItem("email", email.trim());
+			goto('/dashboard');
+		}
+		console.log(data)
 	};
 </script>
 
