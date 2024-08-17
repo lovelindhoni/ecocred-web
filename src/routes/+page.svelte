@@ -79,7 +79,6 @@
 	let water = 9;
 	let username = '';
 	const jwt = sessionStorage.getItem('jwt');
-	if (jwt !== null) goto('/dashboard');
 
 	// Get the list of states from the keys of the citiesByState object
 	const states = Object.keys(citiesByState);
