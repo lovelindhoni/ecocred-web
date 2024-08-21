@@ -1,30 +1,36 @@
 <script lang="ts">
 	import logo from '$lib/assets/ecology-sprout-svgrepo-com.svg';
 	import user from '$lib/assets/profile.png';
-	import { Client } from '@gradio/client';
-	let app: undefined | Client = undefined;
+	import { HfInference } from '@huggingface/inference';
+  import { PUBLIC_HF_TOKEN } from '$env/static/public'
+	let app = false
 	let exchanges = [
 		{
 			owner: 'bot',
 			text: 'Hello there, I am Eco Chat, I can answer your queries related to green score'
 		}
 	];
+	const inference = new HfInference(PUBLIC_HF_TOKEN);
+
 	const init = async () => {
 		console.log('initing');
-		app = await Client.connect('huggingface-projects/gemma-2-9b-it');
-		const response = await app.predict('/chat', {
-			message:
-				"Just analyze this: My green score is based on my electricity, water, and LPG consumption. Don't respond now. But I will be talking about it from now",
-			max_new_tokens: 1024,
-			temperature: 0.6,
-			top_p: 0.9,
-			top_k: 50,
-			repetition_penalty: 1.2
+		const response = await inference.chatCompletion({
+			model: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
+			messages: [
+				{
+					role: 'user',
+					content:
+						"Just analyze this: My green score is based on my electricity, water, and LPG consumption. Don't respond now. But I will be talking about it from now"
+				}
+			],
+			max_tokens: 500
 		});
-		console.log(response);
+		const reply = response.choices[0]?.message?.content || '';
+		console.log(reply);
+    app = true
 	};
 	let userText = '';
-	$: disabled = app === undefined ? true : false;
+	$: disabled = !app;
 	const sendMessage = async () => {
 		userText = userText.trim();
 		disabled = true;
@@ -37,20 +43,21 @@
 			...exchanges,
 			{ owner: 'bot', text: "loading cheap bastard, that's what u get for using a free HF space" }
 		];
-		const response = await (app as Client).predict('/chat', {
-			message: userText,
-			max_new_tokens: 1024,
-			temperature: 0.6,
-			top_p: 0.9,
-			top_k: 50,
-			repetition_penalty: 1.2
+		const response = await inference.chatCompletion({
+			model: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
+			messages: [{ role: 'user', content: userText }],
+			max_tokens: 500
 		});
-		console.log(response.data[0]);
+		const reply = response.choices[0]?.message?.content || '';
+
 		exchanges.pop();
 		exchanges = exchanges;
-		exchanges = [...exchanges, { owner: 'bot', text: response.data[0] }];
+		exchanges = [...exchanges, { owner: 'bot', text: reply }];
 		disabled = false;
 		userText = '';
+	};
+	const handleKeyUp = (event: KeyboardEvent) => {
+		if (event.key === 'Enter') sendMessage();
 	};
 </script>
 
@@ -112,6 +119,7 @@
 				placeholder="Message EcoChat"
 				bind:value={userText}
 				{disabled}
+				on:keyup={handleKeyUp}
 			/>
 			<svg
 				viewBox="0 0 24 24"

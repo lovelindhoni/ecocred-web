@@ -36,7 +36,7 @@
 	"type": "module",
 	"dependencies": {
 		"@carbon/charts-svelte": "^1.19.2",
-		"@gradio/client": "^1.5.0",
+		"@huggingface/inference": "^2.8.0",
 		"svelte-speedometer": "2.0"
 	}
 }
