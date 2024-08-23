@@ -4,9 +4,6 @@
 	import { HfInference } from '@huggingface/inference';
 	import { PUBLIC_HF_TOKEN } from '$env/static/public';
 	import { goto } from '$app/navigation';
-	import markdownit from 'markdown-it';
-
-	const md = markdownit();
 
 	let app = false;
 	let exchanges = [
