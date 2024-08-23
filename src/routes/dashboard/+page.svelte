@@ -10,8 +10,13 @@
 	if (jwt == null) {
 		goto('/');
 	}
+
 	const email = sessionStorage.getItem('email');
-	let graphData;
+
+	const logout = () => {
+		sessionStorage.clear();
+		goto('/');
+	};
 	let homeData;
 	const home = async () => {
 		const response = await fetch('https://eco-cred.vercel.app/api/home/', {
@@ -24,7 +29,7 @@
 			throw new Error(`HTTP error! status: ${response.status}`);
 		}
 		const data = await response.json();
-		console.log(data);
+		console.log("home", data);
 		homeData = data;
 	};
 	const graph = async () => {
@@ -45,24 +50,44 @@
 </script>
 
 <main class="box-border flex h-[100vh] w-[100vw] flex-col">
-	<div class="flex w-full justify-between bg-[#22c55e] p-8 text-white">
-		<div class="flex items-center justify-center gap-4">
-			<img src={logo} class="h-20 w-20" alt="" />
-			<p class="text-5xl font-bold">EcoCred</p>
-		</div>
-		<div class="flex items-center gap-4">
-			<img src={user} class="h-12 w-12" alt="" />
-			<p class="text-xl font-bold">{email}</p>
+	<div class="navbar h-28 bg-[#22c55e]">
+		<div class="flex w-full items-center justify-between mx-4 ">
+			<div class="flex items-center justify-center space-x-5 cursor-pointer" on:click={() => goto('/dashboard')}>
+				<img src={logo} class="h-12 w-12" alt="" />
+				<p class="text-3xl font-bold text-white">EcoCred</p>
+			</div>
+			<div class="flex space-x-10 text-2xl font-semibold text-white">
+				<div class="underline cursor-pointer">Dashboard</div>
+				<div on:click={() => goto('/chat')} class="cursor-pointer">Chat</div>
+				<div on:click={() => goto('/aboutus')} class="cursor-pointer">About Us</div>
+			</div>
+			<div class="flex items-center justify-center gap-2">
+				{#if homeData}
+					<p class="text-2xl text-white font-semibold cursor-pointer">{homeData.user_data.Name}</p>
+				{/if}
+
+				<div class="dropdown dropdown-end">
+					<div tabindex="0" role="button" class="avatar btn btn-circle btn-ghost">
+						<div class="w-10 rounded-full">
+							<img alt="Tailwind CSS Navbar component" src={user} />
+						</div>
+					</div>
+					<ul
+						tabindex="0"
+						class="menu border dropdown-content menu-sm z-[1] mt-3 w-fit rounded-box bg-base-100 p-2 shadow"
+					>
+						<li>
+							<a href="#" class="justify-between">
+								{email}
+							</a>
+						</li>
+						<li on:click={logout}><a>Logout</a></li>
+					</ul>
+				</div>
+			</div>
 		</div>
 	</div>
 	<div class="flex flex-1 flex-col items-center justify-center">
-		<div class=" flex w-fit items-center justify-center gap-24 rounded-xl p-8">
-			<img src={user} class="h-24 w-24" alt="" />
-			<div>
-				<p class="text-2xl">{email}</p>
-				<p class="text-2xl">East Delhi</p>
-			</div>
-		</div>
 		<div class="flex w-full flex-1 border border-[#ccc]">
 			{#if homeData}
 				<div
@@ -79,11 +104,11 @@
 						</div>
 					</div>
 				</div>
-				<div class="flex-1 border border-[#ccc] p-12">
+				<div class="my-auto flex-1 p-[2vw]">
 					{#await graph()}
 						<p>...</p>
 					{:then data}
-						<Graph rawData={data.data}/>
+						<Graph rawData={data.data} />
 					{/await}
 				</div>
 				<div class="flex-2 pn flex flex-col justify-center border border-[#ccc] p-12">
@@ -94,19 +119,26 @@
 							<p>{homeData.average_recycle_score}</p>
 						</div>
 					</div>
-					<div class="mt-14 flex w-full flex-col justify-center items-center space-y-5">
-						<div class="flex space-x-10 text-2xl justify-between items-center  w-full">
+					<div class="mt-14 flex w-full flex-col items-center justify-center space-y-5">
+						{#if homeData.iot_available}
+						<div class="flex w-full items-center justify-between space-x-10 text-2xl">
+							<p>IOT Product ID linked</p>
+							<span class="badge bg-[#22c55e] p-4 text-2xl font-bold text-white">Success</span>
+						</div>
+						{:else}
+						<div class="flex w-full items-center justify-between space-x-10 text-2xl">
 							<p>Electricity Bill linked</p>
 							<span class="badge bg-[#22c55e] p-4 text-2xl font-bold text-white">Success</span>
 						</div>
-						<div class="flex  space-x-10 text-2xl items-center justify-between w-full">
+						<div class="flex w-full items-center justify-between space-x-10 text-2xl">
 							<p>Water Bill linked</p>
 							<span class="badge bg-[#22c55e] p-4 text-2xl font-bold text-white">Success</span>
 						</div>
-						<div class="flex items-center space-x-10 text-2xl justify-between w-full">
+						<div class="flex w-full items-center justify-between space-x-10 text-2xl">
 							<p>LPG linked</p>
 							<span class="badge bg-[#22c55e] p-4 text-2xl font-bold text-white">Success</span>
 						</div>
+						{/if}
 					</div>
 				</div>
 			{/if}

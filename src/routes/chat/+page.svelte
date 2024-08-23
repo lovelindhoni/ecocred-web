@@ -2,14 +2,20 @@
 	import logo from '$lib/assets/ecology-sprout-svgrepo-com.svg';
 	import user from '$lib/assets/profile.png';
 	import { HfInference } from '@huggingface/inference';
-  import { PUBLIC_HF_TOKEN } from '$env/static/public'
-	let app = false
+	import { PUBLIC_HF_TOKEN } from '$env/static/public';
+	import { goto } from '$app/navigation';
+	import markdownit from 'markdown-it';
+
+	const md = markdownit();
+
+	let app = false;
 	let exchanges = [
 		{
 			owner: 'bot',
 			text: 'Hello there, I am Eco Chat, I can answer your queries related to green score'
 		}
 	];
+
 	const inference = new HfInference(PUBLIC_HF_TOKEN);
 
 	const init = async () => {
@@ -27,7 +33,7 @@
 		});
 		const reply = response.choices[0]?.message?.content || '';
 		console.log(reply);
-    app = true
+		app = true;
 	};
 	let userText = '';
 	$: disabled = !app;
@@ -41,7 +47,7 @@
 		exchanges = [...exchanges, { owner: 'user', text: userText }];
 		exchanges = [
 			...exchanges,
-			{ owner: 'bot', text: "loading cheap bastard, that's what u get for using a free HF space" }
+			{ owner: 'bot', text: `<span class="loading loading-dots loading-xs"></span>` }
 		];
 		const response = await inference.chatCompletion({
 			model: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
@@ -59,37 +65,56 @@
 	const handleKeyUp = (event: KeyboardEvent) => {
 		if (event.key === 'Enter') sendMessage();
 	};
+
+	const logout = () => {
+		sessionStorage.clear();
+		goto('/');
+	};
 </script>
 
 <main class="box-border flex h-[100dvh] w-[100dvw] flex-col">
-	<div class="flex h-[15%] w-full justify-between bg-[#22c55e] px-8 text-white">
-		<div class="flex items-center justify-center gap-4">
-			<img src={logo} class="h-20 w-20" alt="" />
-			<p class="text-5xl font-bold">EcoCred</p>
-		</div>
-		<div class="flex items-center gap-4">
-			<img src={user} class="h-12 w-12" alt="" />
-			<p class="text-xl font-bold">some mfer here</p>
+	<div class="navbar h-28 bg-[#22c55e]">
+		<div class="mx-4 flex w-full items-center justify-between">
+			<div class="flex items-center justify-center space-x-5 cursor-pointer" on:click={() => goto('/dashboard')}>
+				<img src={logo} class="h-12 w-12" alt="" />
+				<p class="text-3xl font-bold text-white" >EcoCred</p>
+			</div>
+			<div class="flex space-x-10 text-2xl font-semibold text-white">
+				<div on:click={() => goto('/dashboard')} class="cursor-pointer">Dashboard</div>
+				<div class="cursor-pointer underline">Chat</div>
+				<div on:click={() => goto('/aboutus')} class="cursor-pointer">About Us</div>
+			</div>
 		</div>
 	</div>
 	<div class="mx-auto box-border flex h-[85%] w-1/2 flex-col pt-8">
 		<h1 class="text-center text-4xl font-bold">Welcome to EcoChat</h1>
 		<div class="scrollable mt-4 box-border flex-1 overflow-y-auto px-8">
 			{#await init()}
-				...initing
+			<div class="chat chat-start">
+				<div class="avatar chat-image">
+					<div class="w-10 rounded-full">
+						<img
+							alt="Tailwind CSS chat bubble component"
+							src="https://media.wired.com/photos/592d06185fd65b767a6f2dfa/master/w_2560%2Cc_limit/chat_bot-01-green.jpg"
+						/>
+					</div>
+				</div>
+				<div class="chat-bubble box-border flex items-center justify-center p-4">
+					{@html `<span class="loading loading-dots loading-xs"></span>`}
+				</div>
+			</div>
 			{:then}
 				{#each exchanges as exchange}
 					{#if exchange.owner === 'user'}
 						<div class="chat chat-end">
 							<div class="avatar chat-image">
 								<div class="w-10 rounded-full">
-									<img
-										alt="Tailwind CSS chat bubble component"
-										src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-									/>
+									<img alt="Tailwind CSS chat bubble component" src={user} />
 								</div>
 							</div>
-							<div class="chat-bubble">{exchange.text}</div>
+							<div class="chat-bubble box-border flex items-center justify-center p-4">
+								{@html exchange.text}
+							</div>
 						</div>
 					{:else}
 						<div class="chat chat-start">
@@ -97,18 +122,17 @@
 								<div class="w-10 rounded-full">
 									<img
 										alt="Tailwind CSS chat bubble component"
-										src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+										src="https://media.wired.com/photos/592d06185fd65b767a6f2dfa/master/w_2560%2Cc_limit/chat_bot-01-green.jpg"
 									/>
 								</div>
 							</div>
-							<div class="chat-bubble">
-								{exchange.text}
+							<div class="chat-bubble box-border flex items-center justify-center p-4">
+								{@html exchange.text}
 							</div>
 						</div>
 					{/if}
 				{/each}
 			{:catch error}
-				<strong>Told U! This's what u get for using a free-ass HF space hosted LLM</strong>
 				<p>{JSON.stringify(error)}</p>
 			{/await}
 		</div>

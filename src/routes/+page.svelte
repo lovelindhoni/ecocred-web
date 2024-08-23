@@ -5,7 +5,6 @@
 	import { isUserLoggedIn, demo } from '$lib/stores/store';
 	import ecology from '$lib/assets/ecology-sprout-svgrepo-com.svg';
 
-	import { onMount } from 'svelte';
 	const citiesByState = {
 		'Andhra Pradesh': [
 			'Visakhapatnam',
@@ -74,12 +73,13 @@
 	let selectedCity = '';
 	let email = '';
 	let password = '';
-	let elec = 0;
-	let lpg = 0;
-	let water = 9;
+	let elec = '';
+	let lpg = '';
+	let water = '';
+	let iot = '';
 	let username = '';
+	let phonenumber = '';
 	const jwt = sessionStorage.getItem('jwt');
-
 	// Get the list of states from the keys of the citiesByState object
 	const states = Object.keys(citiesByState);
 
@@ -95,6 +95,11 @@
 		selectedCity = event.target.value;
 	}
 
+	const parse = (val: string) => {
+		if (val === '') return 'None';
+		return val;
+	};
+
 	const signup = async (event) => {
 		event.preventDefault();
 		console.log(username, email, password);
@@ -108,20 +113,20 @@
 				name: username.trim(),
 				email: email.trim(),
 				new_password: password.trim(),
-				electricity_bill_number: elec.toString(),
-				lpg_service_number: lpg.toString(),
-				water_bill_number: water.toString(),
+				electricity_bill_number: parse(elec.trim()),
+				lpg_service_number: parse(lpg.trim()),
+				water_bill_number: parse(water.trim()),
 				city: selectedCity,
-				state: selectedState
+				state: selectedState,
+				number: phonenumber.trim(),
+				iot: parse(iot.trim())
 			})
 		});
+
 		const data = await response.json();
 		console.log(data);
-		window.alert(
-			'Unfortunately your city is not supported yet. Please use a demo account in meanwhile'
-		);
+		window.alert('Account successfully created. You can log into your account now!');
 		$isUserLoggedIn = true;
-		my_modal_4.showModal();
 	};
 	const login = async () => {
 		console.log('api call started login');
@@ -136,18 +141,19 @@
 			})
 		});
 		const data = await response.json();
-		console.log("Ddd",data);
+		console.log('Ddd', data);
 		if (data.status === 'failure') {
 			window.alert("Sorry user account doesn't exist, please create a new Accounts");
 			$isUserLoggedIn = false;
-		}
-		else{
-			sessionStorage.setItem("jwt", data.access_token);
-			sessionStorage.setItem("email", email.trim());
+		} else {
+			sessionStorage.setItem('jwt', data.access_token);
+			sessionStorage.setItem('email', email.trim());
 			goto('/dashboard');
 		}
-		console.log(data)
+		console.log(data);
 	};
+
+	let isIOT = false;
 </script>
 
 <main class="box-border flex h-[100vh] w-[100vw] bg-gradient-to-r from-green-500 to-green-600">
@@ -155,8 +161,9 @@
 		<img src={ecology} class="h-48 w-48" alt="" />
 		<h1 class="mt-12 text-7xl font-bold text-white">Unlock Sustainable Financing with EcoCred</h1>
 		<p class="mt-8 text-xl font-bold text-white">
-			ecocred is an initiative that calculates your 'green score' to help you access financial loans
-			that reward your eco-friendly lifestyle.
+			EcoCred calculates your Green Score based on sustainable practices, combining it with your
+			CIBIL score to unlock additional benefits. We use advanced methods to help you live
+			sustainably and gain more rewards
 		</p>
 	</div>
 	<div class="flex w-[50%] items-center justify-center">
@@ -165,7 +172,7 @@
 			class="scrollable box-border h-[90%] w-[60%] overflow-y-auto rounded-xl bg-white p-12"
 		>
 			<caption class="flex text-2xl font-bold"
-				>{isUserLoggedIn ? 'Log in' : 'Sign up'} to EcoCred</caption
+				>{$isUserLoggedIn ? 'Log in' : 'Sign up'} to EcoCred</caption
 			>
 			<Modal />
 
@@ -206,8 +213,8 @@
 				<button
 					class="btn btn-lg btn-wide mt-12 bg-[#22c55e] text-2xl font-bold text-white hover:bg-[hsl(142,71%,65%)]"
 					on:click={(event) => {
-						event.preventDefault();
-						login();
+						const form = event.target.closest('form');
+						form.checkValidity() ? login() : form.reportValidity();
 					}}>Log In</button
 				>
 				<p class="mt-12 text-xl">In a hurry? Have a quick</p>
@@ -263,7 +270,7 @@
 					</svg>
 					<input type="text" class="grow" placeholder="Username" bind:value={username} />
 				</label>
-				<p class="mt-8 text-xl">Electricity Bill number</p>
+				<p class="mt-8 text-xl">Phone number</p>
 				<label class="input input-bordered mt-2 flex items-center gap-2">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
@@ -276,53 +283,102 @@
 						/>
 					</svg>
 					<input
-						type="number"
+						type="text"
 						class="grow"
-						bind:value={elec}
+						bind:value={phonenumber}
 						required
-						placeholder="Electricity Bill number"
+						placeholder="Phone number"
 					/>
 				</label>
-				<p class="mt-8 text-xl">LPG service number</p>
-				<label class="input input-bordered mt-2 flex items-center gap-2">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						viewBox="0 0 16 16"
-						fill="currentColor"
-						class="h-4 w-4 opacity-70"
-					>
-						<path
-							d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z"
+				<div class="form-control mt-8">
+					<label class="label cursor-pointer">
+						<span class="label-text text-xl">Do you have a IOT Product ID?</span>
+						<input
+							type="checkbox"
+							bind:checked={isIOT}
+							required
+							class="checkbox border border-black"
 						/>
-					</svg>
-					<input
-						type="number"
-						class="grow"
-						bind:value={lpg}
-						required
-						placeholder="LPG service number"
-					/>
-				</label>
-				<p class="mt-8 text-xl">Water Bill number</p>
-				<label class="input input-bordered mt-2 flex items-center gap-2">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						viewBox="0 0 16 16"
-						fill="currentColor"
-						class="h-4 w-4 opacity-70"
-					>
-						<path
-							d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z"
+					</label>
+				</div>
+				{#if isIOT}
+					<p class="mt-8 text-xl">IOT Device ID</p>
+
+					<label class="input input-bordered mt-2 flex items-center gap-2">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							viewBox="0 0 16 16"
+							fill="currentColor"
+							class="h-4 w-4 opacity-70"
+						>
+							<path
+								d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z"
+							/>
+						</svg>
+						<input type="text" class="grow" bind:value={iot} required placeholder="IOT Device ID" />
+					</label>
+				{:else}
+					<p class="mt-8 text-xl">Electricity Bill number</p>
+					<label class="input input-bordered mt-2 flex items-center gap-2">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							viewBox="0 0 16 16"
+							fill="currentColor"
+							class="h-4 w-4 opacity-70"
+						>
+							<path
+								d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z"
+							/>
+						</svg>
+						<input
+							type="text"
+							class="grow"
+							bind:value={elec}
+							required
+							placeholder="Electricity Bill number"
 						/>
-					</svg>
-					<input
-						type="number"
-						class="grow"
-						bind:value={water}
-						required
-						placeholder="Water Bill number"
-					/>
-				</label>
+					</label>
+					<p class="mt-8 text-xl">LPG service number</p>
+					<label class="input input-bordered mt-2 flex items-center gap-2">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							viewBox="0 0 16 16"
+							fill="currentColor"
+							class="h-4 w-4 opacity-70"
+						>
+							<path
+								d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z"
+							/>
+						</svg>
+						<input
+							type="text"
+							class="grow"
+							bind:value={lpg}
+							required
+							placeholder="LPG service number"
+						/>
+					</label>
+					<p class="mt-8 text-xl">Water Bill number</p>
+					<label class="input input-bordered mt-2 flex items-center gap-2">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							viewBox="0 0 16 16"
+							fill="currentColor"
+							class="h-4 w-4 opacity-70"
+						>
+							<path
+								d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z"
+							/>
+						</svg>
+						<input
+							type="text"
+							class="grow"
+							bind:value={water}
+							required
+							placeholder="Water Bill number"
+						/>
+					</label>
+				{/if}
 				<p for="state-select" class="mt-8 text-xl">State</p>
 				<select
 					id="state-select"
@@ -353,7 +409,10 @@
 				</select>
 				<button
 					class="btn btn-lg btn-wide mt-12 bg-[#22c55e] text-2xl font-bold text-white hover:bg-[hsl(142,71%,65%)]"
-					on:click={signup}>Sign Up</button
+					on:click={(event) => {
+						const form = event.target.closest('form');
+						form.checkValidity() ? signup(event) : form.reportValidity();
+					}}>Sign Up</button
 				>
 			{/if}
 		</form>
