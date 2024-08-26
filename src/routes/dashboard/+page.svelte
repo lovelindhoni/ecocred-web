@@ -59,7 +59,7 @@
 			<div class="flex space-x-10 text-2xl font-semibold text-white">
 				<div class="underline cursor-pointer">Dashboard</div>
 				<div on:click={() => goto('/chat')} class="cursor-pointer">Chat</div>
-				<div on:click={() => goto('/aboutus')} class="cursor-pointer">About Us</div>
+				<div on:click={() => goto('/about-us')} class="cursor-pointer">About Us</div>
 			</div>
 			<div class="flex items-center justify-center gap-2">
 				{#if homeData}

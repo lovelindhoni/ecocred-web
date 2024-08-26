@@ -46,9 +46,10 @@
 			...exchanges,
 			{ owner: 'bot', text: `<span class="loading loading-dots loading-xs"></span>` }
 		];
+    const context = "Context : EcoCred is an innovative project designed to assess and incentivize environmentally conscious behavior by calculating a green score based on a household's consumption of LPG, water, and electricity. This score is normalized among users within the same region to ensure fair comparison. Where government portals provide consumption data, web scraping is utilized; however, recognizing the inconsistency in data availability across India, EcoCre includes an affordable IoT device for direct monitoring and data upload from households. The resulting green score serves as both a measure of environmental impact and a financial tool, offering lower interest rates in the banking sector for users with higher scores. EcoCre thus integrates technology, sustainability, and finance to encourage eco-friendly living."
 		const response = await inference.chatCompletion({
 			model: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
-			messages: [{ role: 'user', content: userText }],
+			messages: [{ role: 'user', content: userText + ` ${context}` }],
 			max_tokens: 500
 		});
 		const reply = response.choices[0]?.message?.content || '';
@@ -79,7 +80,7 @@
 			<div class="flex space-x-10 text-2xl font-semibold text-white">
 				<div on:click={() => goto('/dashboard')} class="cursor-pointer">Dashboard</div>
 				<div class="cursor-pointer underline">Chat</div>
-				<div on:click={() => goto('/aboutus')} class="cursor-pointer">About Us</div>
+				<div on:click={() => goto('/about-us')} class="cursor-pointer">About Us</div>
 			</div>
 		</div>
 	</div>
